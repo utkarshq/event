@@ -1,16 +1,17 @@
 {
-  "name": "month1",
-  "module": "index.ts",
+  "name": "vision-event-engine",
+  "version": "1.0.0",
+  "description": "Vision-first document extraction engine",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts"
+  },
   "devDependencies": {
-    "@types/bun": "^1.3.6",
-    "@types/pdf-parse": "^1.1.5"
+    "@types/bun": "^1.3.6"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "pdf-parse": "^2.4.5"
   }
 }
