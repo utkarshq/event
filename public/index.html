@@ -106,20 +106,21 @@
             </div>
             <div class="modal-body">
                 <div class="tab-group">
-                    <div class="tab active" data-mode="ollama">Local Ollama</div>
-                    <div class="tab" data-mode="openai">OpenAI Cloud</div>
-                    <div class="tab" data-mode="gemini">Google Gemini</div>
+                    <div class="tab" data-mode="gemini">Gemini</div>
+                    <div class="tab" data-mode="openai">OpenAI</div>
+                    <div class="tab" data-mode="ollama">Ollama</div>
                 </div>
 
-                <div id="cfg-section-ollama">
+                <div id="cfg-section-gemini">
                     <div class="form-group">
-                        <label class="form-label">Local Host URL</label>
-                        <input type="text" class="form-input" value="http://localhost:11434" disabled
-                            style="opacity:0.5">
+                        <label class="form-label">API Key</label>
+                        <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIza...">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Model Name</label>
-                        <input type="text" id="cfg-model" class="form-input" placeholder="llama3">
+                        <label class="form-label">Model</label>
+                        <input type="text" id="cfg-gemini-model" class="form-input" placeholder="gemini-2.5-flash">
+                        <span class="text-xs" style="color:var(--text-muted); margin-top:4px; display:block">Examples:
+                            gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash</span>
                     </div>
                 </div>
 
@@ -135,35 +136,34 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Model</label>
-                        <input type="text" class="form-input" value="gpt-4o" disabled style="opacity:0.5">
+                        <input type="text" id="cfg-openai-model" class="form-input" placeholder="gpt-4o">
+                        <span class="text-xs" style="color:var(--text-muted); margin-top:4px; display:block">Examples:
+                            gpt-4o, gpt-4-turbo, gpt-4o-mini</span>
                     </div>
                 </div>
 
-                <div id="cfg-section-gemini" class="hidden">
+                <div id="cfg-section-ollama" class="hidden">
                     <div class="form-group">
-                        <label class="form-label">Gemini API Key</label>
-                        <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIza...">
+                        <label class="form-label">Host URL</label>
+                        <input type="text" id="cfg-ollama-url" class="form-input" placeholder="http://localhost:11434">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Gemini Model</label>
-                        <select id="cfg-gemini-model" class="form-input">
-                            <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
-                            <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
-                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                        </select>
+                        <label class="form-label">Model</label>
+                        <input type="text" id="cfg-model" class="form-input" placeholder="llama3">
+                        <span class="text-xs" style="color:var(--text-muted); margin-top:4px; display:block">Examples:
+                            llama3, llava, mistral, qwen2.5</span>
                     </div>
                 </div>
 
                 <div class="form-group mt-4">
                     <label style="display:flex; align-items:center; gap:10px; cursor:pointer">
                         <input type="checkbox" id="cfg-vram">
-                        <span style="font-size:12px; color:var(--text-muted)">Low VRAM Mode (Skip Vision)</span>
+                        <span style="font-size:12px; color:var(--text-muted)">Low VRAM Mode (Skip Image
+                            Compression)</span>
                     </label>
                 </div>
 
-                <button class="btn" onclick="location.reload()">Reload Core</button>
+                <button class="btn" onclick="location.reload()">Apply & Reload</button>
             </div>
         </div>
     </div>

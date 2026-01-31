@@ -10,9 +10,7 @@ class Store {
         this.proxiedState = new Proxy(this.state, {
             set: (target, key, value) => {
                 target[key] = value;
-                if (['mode', 'openai_key', 'gemini_key', 'openai_url', 'model', 'vram_mode', 'gemini_model'].includes(key)) {
-                    this.save();
-                }
+                this.save();
                 return true;
             }
         });
@@ -23,11 +21,13 @@ class Store {
             const raw = localStorage.getItem(this.lsKey);
             const defaults = {
                 mode: 'gemini',
+                gemini_key: '',
+                gemini_model: 'gemini-2.5-flash',
                 openai_url: 'https://api.openai.com/v1',
                 openai_key: '',
-                gemini_key: '',
-                gemini_model: 'gemini-2.5-flash-preview-05-20',
-                model: 'llama3',
+                openai_model: 'gpt-4o',
+                ollama_url: 'http://localhost:11434',
+                ollama_model: 'llama3',
                 vram_mode: false
             };
             return raw ? { ...defaults, ...JSON.parse(raw) } : defaults;
@@ -71,6 +71,7 @@ const ui = {
             });
         });
 
+        // Bind all text inputs
         const bindInput = (id, key) => {
             const el = document.getElementById(id);
             if (!el) return;
@@ -78,23 +79,27 @@ const ui = {
             el.addEventListener('input', (e) => state[key] = e.target.value);
         };
 
+        // Gemini
+        bindInput('cfg-gemini-key', 'gemini_key');
+        bindInput('cfg-gemini-model', 'gemini_model');
+
+        // OpenAI
         bindInput('cfg-openai-url', 'openai_url');
         bindInput('cfg-openai-key', 'openai_key');
-        bindInput('cfg-gemini-key', 'gemini_key');
-        bindInput('cfg-model', 'model');
+        bindInput('cfg-openai-model', 'openai_model');
 
-        const geminiModelEl = document.getElementById('cfg-gemini-model');
-        if (geminiModelEl) {
-            geminiModelEl.value = state.gemini_model || 'gemini-2.5-flash-preview-05-20';
-            geminiModelEl.addEventListener('change', (e) => state.gemini_model = e.target.value);
-        }
+        // Ollama
+        bindInput('cfg-ollama-url', 'ollama_url');
+        bindInput('cfg-model', 'ollama_model');
 
+        // Checkboxes
         const vramEl = document.getElementById('cfg-vram');
         if (vramEl) {
             vramEl.checked = state.vram_mode;
             vramEl.addEventListener('change', (e) => state.vram_mode = e.target.checked);
         }
 
+        // Mode Tabs
         document.querySelectorAll('.tab[data-mode]').forEach(tab => {
             tab.addEventListener('click', () => {
                 state.mode = tab.dataset.mode;
@@ -102,6 +107,7 @@ const ui = {
             });
         });
 
+        // File Input
         const fileIn = document.getElementById('file-upload');
         if (fileIn) {
             fileIn.addEventListener('change', (e) => {
@@ -127,9 +133,19 @@ const ui = {
             if (el) el.classList.toggle('hidden', state.mode !== m);
         });
 
-        if (document.getElementById('cfg-openai-key')) document.getElementById('cfg-openai-key').value = state.openai_key;
-        if (document.getElementById('cfg-gemini-key')) document.getElementById('cfg-gemini-key').value = state.gemini_key;
-        if (document.getElementById('cfg-openai-url')) document.getElementById('cfg-openai-url').value = state.openai_url;
+        // Sync input values
+        const syncInput = (id, key) => {
+            const el = document.getElementById(id);
+            if (el) el.value = state[key] || '';
+        };
+
+        syncInput('cfg-gemini-key', 'gemini_key');
+        syncInput('cfg-gemini-model', 'gemini_model');
+        syncInput('cfg-openai-url', 'openai_url');
+        syncInput('cfg-openai-key', 'openai_key');
+        syncInput('cfg-openai-model', 'openai_model');
+        syncInput('cfg-ollama-url', 'ollama_url');
+        syncInput('cfg-model', 'ollama_model');
     },
 
     log: (tag, msg, type = 'info') => {
@@ -251,18 +267,33 @@ const api = {
     },
 
     reason: async (text, base64Image) => {
-        ui.log('EXEC', `[REQUEST] POST /api/parse-sync`, 'sys');
+        // Build config based on selected mode
+        let provider_url, api_key, model;
+
+        if (state.mode === 'gemini') {
+            provider_url = 'https://generativelanguage.googleapis.com';
+            api_key = state.gemini_key;
+            model = state.gemini_model || 'gemini-2.5-flash';
+        } else if (state.mode === 'openai') {
+            provider_url = state.openai_url || 'https://api.openai.com/v1';
+            api_key = state.openai_key;
+            model = state.openai_model || 'gpt-4o';
+        } else {
+            provider_url = state.ollama_url || 'http://localhost:11434';
+            api_key = '';
+            model = state.ollama_model || 'llama3';
+        }
+
+        ui.log('EXEC', `[REQUEST] POST /api/parse-sync | provider=${state.mode} model=${model}`, 'sys');
 
         try {
             const payload = {
                 ocr_text: text,
                 base64_image: base64Image || undefined,
-                model: state.mode === 'gemini' ? (state.gemini_model || 'gemini-2.5-flash-preview-05-20') : state.model,
+                model,
                 today_date: new Date().toISOString(),
-                api_key: state.mode === 'openai' ? state.openai_key : (state.mode === 'gemini' ? state.gemini_key : ''),
-                provider_url: state.mode === 'gemini'
-                    ? 'https://generativelanguage.googleapis.com'
-                    : (state.mode === 'openai' ? state.openai_url : 'http://localhost:11434')
+                api_key,
+                provider_url
             };
 
             const res = await fetch('/api/parse-sync', {
