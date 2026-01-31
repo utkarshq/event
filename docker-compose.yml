@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    network_mode: "host"
+    environment:
+      - OLLAMA_HOST=http://localhost:11434
+      - OLLAMA_MODEL=llava
+    volumes:
+      - ./data:/app/data

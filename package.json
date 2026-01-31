@@ -1,0 +1,16 @@
+{
+  "name": "month1",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "^1.3.6",
+    "@types/pdf-parse": "^1.1.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pdf-parse": "^2.4.5"
+  }
+}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventEngine | Vision Core</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Dock -->
+    <aside class="dock">
+        <div class="dock-item" onclick="location.reload()" title="Reload"><i class="fas fa-microchip"></i></div>
+        <div class="dock-sep"></div>
+        <div class="dock-item active" data-view="home" title="Home"><i class="fas fa-layer-group"></i></div>
+        <div class="dock-item" data-modal="modal-hub" title="Connection Hub"><i class="fas fa-plug"></i></div>
+        <div class="dock-item" data-view="history" title="Archive"><i class="fas fa-archive"></i></div>
+        <div class="dock-sep"></div>
+        <div class="dock-item" data-modal="modal-logs" title="System Logs"><i class="fas fa-terminal"></i></div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+
+        <!-- Header -->
+        <header class="header">
+            <div style="font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;">
+                <span style="color:var(--primary)">EventEngine</span>
+                <span style="opacity: 0.3">|</span>
+                <span style="font-size: 11px; opacity: 0.7; letter-spacing: 1px;">VISION CORE v14.0</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="text-xs" style="color:var(--success); display:flex; align-items:center; gap:6px;">
+                    <div
+                        style="width:6px; height:6px; background:var(--success); border-radius:50%; box-shadow:0 0 8px var(--success)">
+                    </div>
+                    SYSTEM ONLINE
+                </div>
+            </div>
+        </header>
+
+        <!-- View: Home -->
+        <div id="view-home" class="view active">
+            <div class="hero-card" onclick="document.getElementById('file-upload').click()">
+                <div class="hero-icon"><i class="fas fa-bolt"></i></div>
+                <div class="hero-title">Hybrid Ingest</div>
+                <div class="hero-sub">Upload Image or PDF for Analysis</div>
+                <input type="file" id="file-upload" hidden accept="image/*,application/pdf">
+            </div>
+        </div>
+
+        <!-- View: Ingest -->
+        <div id="view-ingest" class="view">
+            <!-- Media Panel -->
+            <div class="panel">
+                <div class="panel-head">Source Material</div>
+                <div class="panel-body">
+                    <div class="media-preview" id="media-preview">
+                        <img src="" alt="Preview">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="panel">
+                <div class="panel-head">Intelligence Extraction</div>
+                <div class="panel-body" id="results-anchor">
+                    <!-- Cards will appear here -->
+                    <div style="text-align: center; color: var(--text-muted); padding-top: 50px;">
+                        <i class="fas fa-spinner fa-spin" style="margin-bottom: 10px;"></i><br>
+                        Awaiting Processing...
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Panel -->
+            <div class="panel" style="background: #000;">
+                <div class="panel-head">System Protocol</div>
+                <div class="panel-body" id="sys-logs">
+                    <!-- Logs -->
+                </div>
+            </div>
+        </div>
+
+        <!-- View: HistoryPlaceholder -->
+        <div id="view-history" class="view" style="align-items:center; justify-content:center; color:var(--text-muted)">
+            <i class="fas fa-archive fa-2x" style="margin-bottom:10px"></i>
+            <div>Archive Access Not Yet Implemented in V14 Core</div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Hub -->
+    <div id="modal-hub" class="overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Connection Hub</div>
+                <i class="fas fa-times" style="cursor:pointer; opacity:0.5"
+                    onclick="this.closest('.overlay').classList.remove('open')"></i>
+            </div>
+            <div class="modal-body">
+                <div class="tab-group">
+                    <div class="tab active" data-mode="ollama">Local Ollama</div>
+                    <div class="tab" data-mode="openai">OpenAI Cloud</div>
+                    <div class="tab" data-mode="gemini">Google Gemini</div>
+                </div>
+
+                <div id="cfg-section-ollama">
+                    <div class="form-group">
+                        <label class="form-label">Local Host URL</label>
+                        <input type="text" class="form-input" value="http://host.docker.internal:11434" disabled
+                            style="opacity:0.5">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Model Name</label>
+                        <input type="text" id="cfg-model" class="form-input" placeholder="llama3">
+                    </div>
+                </div>
+
+                <div id="cfg-section-openai" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">API Endpoint</label>
+                        <input type="text" id="cfg-openai-url" class="form-input"
+                            placeholder="https://api.openai.com/v1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">API Key</label>
+                        <input type="password" id="cfg-openai-key" class="form-input" placeholder="sk-...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Model</label>
+                        <input type="text" class="form-input" value="gpt-4o" disabled style="opacity:0.5">
+                    </div>
+                </div>
+
+                <div id="cfg-section-gemini" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">Gemini API Key</label>
+                        <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIza...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gemini Model</label>
+                        <select id="cfg-gemini-model" class="form-input">
+                            <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro</option>
+                            <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group mt-4">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer">
+                        <input type="checkbox" id="cfg-vram">
+                        <span style="font-size:12px; color:var(--text-muted)">Low VRAM Mode (Skip Vision)</span>
+                    </label>
+                </div>
+
+                <button class="btn" onclick="location.reload()">Reload Core</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Logs -->
+    <div id="modal-logs" class="overlay">
+        <div class="modal" style="width: 800px; height: 600px;">
+            <div class="modal-header">
+                <div class="modal-title">System Logs</div>
+                <i class="fas fa-times" style="cursor:pointer; opacity:0.5"
+                    onclick="this.closest('.overlay').classList.remove('open')"></i>
+            </div>
+            <div class="modal-body" style="background:#000; color:#aaa; font-family:var(--font-mono); font-size:11px;">
+                <div id="full-logs">Initializing...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
