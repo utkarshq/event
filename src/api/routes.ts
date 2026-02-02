@@ -86,6 +86,8 @@ export async function handleApiRequest(req: Request): Promise<Response> {
     const deleteMatch = url.pathname.match(/^\/api\/events\/([a-zA-Z0-9-]+)$/);
     if (deleteMatch && req.method === "DELETE") {
         const id = deleteMatch[1];
+        if (!id) return respond({ error: "Invalid ID" }, { status: 400 });
+
         try {
             const deleted = deleteEvent(id);
             if (deleted) {
