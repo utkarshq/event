@@ -4,25 +4,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EventEngine | Vision Core</title>
+    <title>Vision Event Engine | AI Document Extraction</title>
+
+    <!-- SEO & Meta -->
+    <meta name="description"
+        content="Extract structured data from images and documents using AI. Supports Google Gemini, OpenAI, and local PaddleOCR.">
+    <meta name="keywords" content="OCR, document extraction, AI, vision, Gemini, OpenAI, PaddleOCR">
+    <meta name="author" content="Vision Event Engine">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Vision Event Engine">
+    <meta property="og:description" content="AI-powered document extraction engine">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/favicon.svg">
+
+    <!-- Theme & Icons -->
+    <meta name="theme-color" content="#6366f1">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
+
+    <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="tiers.css">
 </head>
 
 <body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing...</div>
+            <div class="loading-subtext" id="loading-subtext">Analyzing document</div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
 
     <!-- Dock -->
     <aside class="dock">
-        <div class="dock-item" onclick="location.reload()" title="Reload"><i class="fas fa-microchip"></i></div>
+        <div class="dock-item" onclick="location.reload()" title="Reload (Ctrl+R)">
+            <i class="fas fa-microchip"></i>
+        </div>
         <div class="dock-sep"></div>
-        <div class="dock-item active" data-view="home" title="Home"><i class="fas fa-layer-group"></i></div>
-        <div class="dock-item" data-modal="modal-hub" title="Connection Hub"><i class="fas fa-plug"></i></div>
-        <div class="dock-item" data-view="history" title="Archive"><i class="fas fa-archive"></i></div>
+        <div class="dock-item active" data-view="home" title="Home (Ctrl+H)">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="dock-item" data-modal="modal-hub" title="Settings (Ctrl+,)">
+            <i class="fas fa-plug"></i>
+        </div>
+        <div class="dock-item" data-view="history" title="History (Ctrl+Shift+H)">
+            <i class="fas fa-archive"></i>
+        </div>
         <div class="dock-sep"></div>
-        <div class="dock-item" data-modal="modal-logs" title="System Logs"><i class="fas fa-terminal"></i></div>
+        <div class="dock-item" data-modal="modal-logs" title="Logs (Ctrl+L)">
+            <i class="fas fa-terminal"></i>
+        </div>
+        <div class="dock-version">v1.0</div>
     </aside>
 
     <!-- Main Workspace -->
@@ -36,22 +80,25 @@
                 <span style="font-size: 11px; opacity: 0.7; letter-spacing: 1px;">VISION CORE</span>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <div class="text-xs" style="color:var(--success); display:flex; align-items:center; gap:6px;">
-                    <div
-                        style="width:6px; height:6px; background:var(--success); border-radius:50%; box-shadow:0 0 8px var(--success)">
-                    </div>
-                    SYSTEM ONLINE
+                <div id="system-status-container" class="text-xs"
+                    style="color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+                    <div id="system-status-dot" class="status-dot"></div>
+                    <span id="system-status-text">SYSTEM OFFLINE</span>
                 </div>
             </div>
         </header>
 
         <!-- View: Home -->
         <div id="view-home" class="view active">
-            <div class="hero-card" onclick="document.getElementById('file-upload').click()">
+            <div class="hero-card drop-zone" id="drop-zone" onclick="document.getElementById('file-upload').click()">
                 <div class="hero-icon"><i class="fas fa-bolt"></i></div>
                 <div class="hero-title">Hybrid Ingest</div>
-                <div class="hero-sub">Upload Image or PDF for Analysis</div>
+                <div class="hero-sub">Drop an image here or click to upload</div>
+                <div class="hero-hint">Supports JPEG, PNG, WebP, PDF</div>
                 <input type="file" id="file-upload" hidden accept="image/*,application/pdf">
+            </div>
+            <div class="keyboard-hint">
+                <kbd>Ctrl</kbd> + <kbd>U</kbd> to upload
             </div>
         </div>
 
@@ -64,17 +111,32 @@
                     <div class="media-preview" id="media-preview">
                         <img src="" alt="Preview">
                     </div>
+                    <div class="processing-time" id="processing-time"></div>
                 </div>
             </div>
 
             <!-- Output Panel -->
             <div class="panel">
-                <div class="panel-head">Intelligence Extraction</div>
+                <div class="panel-head">
+                    <span>Intelligence Extraction</span>
+                    <div class="panel-actions" id="result-actions" style="display: none;">
+                        <button class="btn-icon" onclick="exportJSON()" title="Export JSON">
+                            <i class="fas fa-code"></i>
+                        </button>
+                        <button class="btn-icon" onclick="exportCSV()" title="Export CSV">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button class="btn-icon" onclick="copyToClipboard()" title="Copy to Clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="panel-body" id="results-anchor">
                     <!-- Cards will appear here -->
-                    <div style="text-align: center; color: var(--text-muted); padding-top: 50px;">
-                        <i class="fas fa-spinner fa-spin" style="margin-bottom: 10px;"></i><br>
-                        Awaiting Processing...
+                    <div class="empty-state">
+                        <i class="fas fa-sparkles"></i>
+                        <div>Awaiting Processing</div>
+                        <div class="empty-hint">Upload an image to begin extraction</div>
                     </div>
                 </div>
             </div>
@@ -91,7 +153,14 @@
         <!-- View: History -->
         <div id="view-history" class="view">
             <div class="panel" style="flex: 1; border-right: none;">
-                <div class="panel-head">Historical Extractions</div>
+                <div class="panel-head">
+                    <span>Historical Extractions</span>
+                    <div class="panel-actions">
+                        <button class="btn-icon" onclick="api.fetchEvents()" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="panel-body">
                     <div id="history-list" class="history-grid">
                         <!-- History items will be injected here -->
@@ -111,65 +180,109 @@
                     onclick="this.closest('.overlay').classList.remove('open')"></i>
             </div>
             <div class="modal-body">
-                <div class="tab-group">
-                    <div class="tab" data-mode="gemini">Gemini</div>
-                    <div class="tab" data-mode="openai">OpenAI Compatible</div>
-                    <div class="tab" data-mode="ollama">Ollama</div>
-                </div>
-
-                <div id="cfg-section-gemini">
-                    <div class="form-group">
-                        <label class="form-label">API Key</label>
-                        <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIza...">
+                <!-- Strategy Selection -->
+                <div class="panel-head" style="background:transparent; padding:0; margin-bottom:12px;">Extraction
+                    Strategy</div>
+                <div class="strategy-grid">
+                    <div class="strategy-card active" data-strategy="A">
+                        <div class="strategy-icon"><i class="fas fa-eye"></i></div>
+                        <div class="strategy-name">Full Vision LLM</div>
+                        <div class="strategy-desc">AI processes image directly. Highest accuracy, highest latency.</div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Model</label>
-                        <input type="text" id="cfg-gemini-model" class="form-input" placeholder="gemini-2.5-flash">
-                        <span class="text-xs" style="color:var(--text-muted); margin-top:4px; display:block">Examples:
-                            gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash</span>
+                    <div class="strategy-card" data-strategy="B">
+                        <div class="strategy-icon"><i class="fas fa-layer-group"></i></div>
+                        <div class="strategy-name">Hybrid Pipeline</div>
+                        <div class="strategy-desc">Local PaddleOCR + LLM Structurization. Best balance.</div>
                     </div>
-                </div>
-
-                <div id="cfg-section-openai" class="hidden">
-                    <div class="form-group">
-                        <label class="form-label">API Endpoint</label>
-                        <input type="text" id="cfg-openai-url" class="form-input"
-                            placeholder="https://api.openai.com/v1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">API Key</label>
-                        <input type="password" id="cfg-openai-key" class="form-input" placeholder="sk-...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Model</label>
-                        <input type="text" id="cfg-openai-model" class="form-input" placeholder="gpt-4o">
-                        <span class="text-xs" style="color:var(--text-muted); margin-top:4px; display:block">Examples:
-                            gpt-4o, gpt-4-turbo, gpt-4o-mini</span>
+                    <div class="strategy-card" data-strategy="C">
+                        <div class="strategy-icon"><i class="fas fa-microchip"></i></div>
+                        <div class="strategy-name">Local OCR Only</div>
+                        <div class="strategy-desc">Local PaddleOCR. No LLM tokens. Fast & Offline ready.</div>
                     </div>
                 </div>
 
-                <div id="cfg-section-ollama" class="hidden">
-                    <div class="form-group">
-                        <label class="form-label">Host URL</label>
-                        <input type="text" id="cfg-ollama-url" class="form-input" placeholder="http://localhost:11434">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Model</label>
-                        <input type="text" id="cfg-model" class="form-input" placeholder="llama3">
-                        <span class="text-xs" style="color:var(--text-muted); margin-top:4px; display:block">Examples:
-                            llama3, llava, mistral, qwen2.5</span>
+                <!-- Multi-Tier Local Model Hub -->
+                <div id="localTierHub" class="hub-section">
+                    <div class="panel-head" style="background:transparent; padding:0; margin-bottom:12px;">Local Model
+                        Tiers</div>
+                    <div class="tier-grid">
+                        <div class="tier-card" id="tier-eco" onclick="setTier('eco')">
+                            <div class="tier-badge eco">ECO</div>
+                            <div class="tier-name">Standard OCR</div>
+                            <div class="tier-desc">Fast, CPU-only. ~500MB RAM.</div>
+                            <div class="tier-status" id="status-eco">Status: -</div>
+                            <button class="btn btn-xs btn-outline" onclick="installTier('eco', event)">Install</button>
+                        </div>
+                        <div class="tier-card" id="tier-lite" onclick="setTier('lite')">
+                            <div class="tier-badge lite">LITE</div>
+                            <div class="tier-name">VLM 1.5 Quant</div>
+                            <div class="tier-desc">Balanced, ~2GB RAM. INT4.</div>
+                            <div class="tier-status" id="status-lite">Status: -</div>
+                            <button class="btn btn-xs btn-outline" onclick="installTier('lite', event)">Install</button>
+                        </div>
+                        <div class="tier-card" id="tier-pro" onclick="setTier('pro')">
+                            <div class="tier-badge pro">PRO</div>
+                            <div class="tier-name">VLM 1.5 Full</div>
+                            <div class="tier-desc">Full Accuracy, ~8GB RAM.</div>
+                            <div class="tier-status" id="status-pro">Status: -</div>
+                            <button class="btn btn-xs btn-outline" onclick="installTier('pro', event)">Install</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group mt-4">
-                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer">
-                        <input type="checkbox" id="cfg-vram">
-                        <span style="font-size:12px; color:var(--text-muted)">Low VRAM Mode (Skip Image
-                            Compression)</span>
-                    </label>
+                <div class="dock-sep" style="width:100%"></div>
+
+                <!-- Provider Tabs (Optional if LLM is needed) -->
+                <div id="llm-config-section">
+                    <div class="tab-group">
+                        <div class="tab" data-mode="gemini">Gemini</div>
+                        <div class="tab" data-mode="openai">OpenAI</div>
+                        <div class="tab" data-mode="ollama">Ollama</div>
+                    </div>
+
+                    <div id="cfg-section-gemini">
+                        <div class="form-group">
+                            <label class="form-label">API Key</label>
+                            <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIza...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model</label>
+                            <input type="text" id="cfg-gemini-model" class="form-input" placeholder="gemini-2.0-flash">
+                        </div>
+                    </div>
+
+                    <div id="cfg-section-openai" class="hidden">
+                        <div class="form-group">
+                            <label class="form-label">API Endpoint</label>
+                            <input type="text" id="cfg-openai-url" class="form-input"
+                                placeholder="https://api.openai.com/v1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">API Key</label>
+                            <input type="password" id="cfg-openai-key" class="form-input" placeholder="sk-...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model</label>
+                            <input type="text" id="cfg-openai-model" class="form-input" placeholder="gpt-4o">
+                        </div>
+                    </div>
+
+                    <div id="cfg-section-ollama" class="hidden">
+                        <div class="form-group">
+                            <label class="form-label">Host URL</label>
+                            <input type="text" id="cfg-ollama-url" class="form-input"
+                                placeholder="http://localhost:11434">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model</label>
+                            <input type="text" id="cfg-model" class="form-input" placeholder="llama3">
+                        </div>
+                    </div>
                 </div>
 
-                <button class="btn" onclick="location.reload()">Apply & Reload</button>
+                <button class="btn mt-4" onclick="saveAndClose()">
+                    <i class="fas fa-check"></i> Save Configuration
+                </button>
             </div>
         </div>
     </div>
@@ -179,11 +292,32 @@
         <div class="modal" style="width: 800px; height: 600px;">
             <div class="modal-header">
                 <div class="modal-title">System Logs</div>
-                <i class="fas fa-times" style="cursor:pointer; opacity:0.5"
-                    onclick="this.closest('.overlay').classList.remove('open')"></i>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-icon" onclick="clearLogs()" title="Clear logs">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <i class="fas fa-times" style="cursor:pointer; opacity:0.5"
+                        onclick="this.closest('.overlay').classList.remove('open')"></i>
+                </div>
             </div>
             <div class="modal-body" style="background:#000; color:#aaa; font-family:var(--font-mono); font-size:11px;">
                 <div id="full-logs">Initializing...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirm-dialog" class="overlay">
+        <div class="modal" style="width: 400px;">
+            <div class="modal-header">
+                <div class="modal-title" id="confirm-title">Confirm</div>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Are you sure?</p>
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn btn-outline" style="flex:1" onclick="confirmCancel()">Cancel</button>
+                    <button class="btn" style="flex:1; background: var(--danger)" onclick="confirmOk()">Delete</button>
+                </div>
             </div>
         </div>
     </div>

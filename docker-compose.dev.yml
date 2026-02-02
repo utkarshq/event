@@ -1,0 +1,44 @@
+# Vision Event Engine - Development Docker Compose
+# Extends the base configuration with development overrides
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vision-event-engine-dev
+
+    # Expose ports for development
+    ports:
+      - "3000:3000"
+      - "5000:5000" # Direct access to OCR bridge
+
+    # Development environment
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - SERVE_STATIC=true
+      - DEBUG=*
+      # Use host network for Ollama access
+      - OLLAMA_HOST=http://host.docker.internal:11434
+
+    # Mount source for hot reload
+    volumes:
+      # Live source mount (hot reload)
+      - ./src:/app/src:ro
+      - ./public:/app/public:ro
+      # SQLite database
+      - ./data:/app/data
+      # OCR model cache
+      - ./.paddle_cache:/app/.paddle_cache
+
+    # Development overrides
+    command: [ "bun", "--watch", "src/server.ts" ]
+
+    # Less strict health check for development
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/paddle/status" ]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 180s

@@ -1,34 +1,49 @@
-# dependencies (bun install)
-node_modules
+# Vision Event Engine - Git Ignore
 
-# output
-out
-dist
-*.tgz
+# Dependencies
+node_modules/
+.venv/
 
-# code coverage
-coverage
-*.lcov
-
-# logs
-logs
-_.log
-report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# caches
-.eslintcache
-.cache
+# Build artifacts
+dist/
 *.tsbuildinfo
 
-# IntelliJ based IDEs
-.idea
+# Runtime/Cache
+.paddle_cache/
+__pycache__/
+*.pyc
+*.pyo
 
-# Finder (MacOS) folder config
+# Data (optional - remove if you want to track database)
+data/*.sqlite
+data/*.sqlite-journal
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.bak
+/tmp/
+
+# Model weights (downloaded at runtime)
+*.onnx
+*.pdmodel
+*.pdiparams

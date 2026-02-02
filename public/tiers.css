@@ -1,0 +1,83 @@
+/* --- Multi-Tier Model Hub --- */
+.tier-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.tier-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+}
+
+.tier-card:hover {
+    border-color: var(--primary);
+    background: var(--bg-surface);
+    transform: translateY(-2px);
+}
+
+.tier-card.active {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+.tier-badge {
+    align-self: flex-start;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.tier-badge.eco {
+    background: #10b981;
+    color: #004433;
+}
+
+.tier-badge.lite {
+    background: #6366f1;
+    color: #ffffff;
+}
+
+.tier-badge.pro {
+    background: #a855f7;
+    color: #ffffff;
+}
+
+.tier-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-main);
+}
+
+.tier-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.tier-status {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    margin-top: auto;
+}
+
+.btn-xs {
+    padding: 6px 12px;
+    font-size: 11px;
+    width: auto;
+}

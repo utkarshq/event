@@ -1,0 +1,55 @@
+# Vision Event Engine - Docker Ignore
+# Exclude files not needed in the Docker build context
+
+# Git
+.git
+.gitignore
+
+# Development files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Dependencies (installed during build)
+node_modules
+
+# Python virtual environment (built in Docker)
+.venv
+
+# Cache directories
+.paddle_cache
+__pycache__
+*.pyc
+.cache
+
+# Data directory (mounted as volume)
+data/
+
+# Documentation (not needed at runtime)
+*.md
+!README.md
+docs/
+
+# Build artifacts
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*.test.ts
+*.spec.ts
+test/
+tests/
+
+# Local development files
+.env
+.env.local
+*.local
+
+# Backup files
+*.bak
+*~

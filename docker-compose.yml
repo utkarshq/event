@@ -1,9 +1,52 @@
+# Vision Event Engine - Docker Compose Configuration
+# Production-ready setup with proper volumes and health checks
+
 services:
   app:
-    build: .
-    network_mode: "host"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vision-event-engine
+    restart: unless-stopped
+
+    # Port mapping
+    ports:
+      - "3000:3000"
+
+    # Environment configuration
     environment:
-      - OLLAMA_HOST=http://localhost:11434
-      - OLLAMA_MODEL=llava
+      - NODE_ENV=production
+      - PORT=3000
+      - SERVE_STATIC=true
+      # Ollama host (uncomment if using local Ollama)
+      # - OLLAMA_HOST=http://host.docker.internal:11434
+
+      # Persistent storage
     volumes:
+      # SQLite database persistence
       - ./data:/app/data
+      # OCR model cache (speeds up subsequent starts)
+      - paddle-cache:/app/.paddle_cache
+
+    # Health check
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/paddle/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s # OCR models take time to load
+
+    # Resource limits (optional, adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+# Named volumes for data persistence
+volumes:
+  paddle-cache:
+    driver: local
