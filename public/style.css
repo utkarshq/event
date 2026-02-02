@@ -78,6 +78,8 @@ body {
     position: relative;
     overflow: hidden;
     background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-app) 50%);
+    min-height: 0;
+    /* Crucial for scrolling children */
 }
 
 .header {
@@ -127,19 +129,22 @@ body {
 /* --- Components: Views --- */
 .view {
     flex: 1;
-    display: none;
-    /* Toggled by JS */
+    display: none !important;
+    /* Force hide by default to prevent ID specificity issues */
     opacity: 0;
     transition: opacity 0.3s ease;
+    min-height: 0;
 }
 
 .view.active {
-    display: flex;
+    display: flex !important;
+    /* Force show when active */
     opacity: 1;
 }
 
 /* Home View */
-#view-home {
+#view-home.active {
+    display: flex !important;
     align-items: center;
     justify-content: center;
     flex-direction: column;
@@ -185,11 +190,14 @@ body {
 }
 
 /* Ingest View */
-#view-ingest {
-    width: 100%;
-    height: 100%;
-    display: grid;
+#view-ingest.active {
+    display: grid !important;
     grid-template-columns: 350px 1fr 400px;
+    height: 100%;
+    width: 100%;
+}
+
+#view-ingest {
     overflow: hidden;
 }
 
@@ -198,6 +206,7 @@ body {
     display: flex;
     flex-direction: column;
     background: rgba(10, 10, 10, 0.4);
+    min-height: 0;
 }
 
 .panel:last-child {
@@ -486,6 +495,75 @@ body {
 
 .mt-4 {
     margin-top: 16px;
+}
+
+/* History View */
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.history-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.history-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.history-card .date {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.history-card .title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-main);
+}
+
+.history-card .meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.history-card .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.history-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.history-card:hover::after {
+    opacity: 1;
 }
 
 /* Scrollbar */

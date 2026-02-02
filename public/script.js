@@ -121,6 +121,10 @@ const ui = {
         document.querySelector(`.dock-item[data-view="${viewId}"]`)?.classList.add('active');
         document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
         document.getElementById(`view-${viewId}`).classList.add('active');
+
+        if (viewId === 'history') {
+            api.fetchEvents();
+        }
     },
 
     renderConfig: () => {
@@ -193,6 +197,44 @@ const ui = {
             div.className = 'card';
             div.innerHTML = `<div class="card-label">${k}</div><div class="card-value">${v}</div>`;
             anchor.appendChild(div);
+        });
+    },
+
+    renderHistory: (events) => {
+        const list = document.getElementById('history-list');
+        if (!list) return;
+        list.innerHTML = '';
+
+        if (!events || events.length === 0) {
+            list.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 100px; color: var(--text-muted);">No historical records found.</div>';
+            return;
+        }
+
+        events.forEach(event => {
+            const date = new Date(event.created_at).toLocaleString();
+            const card = document.createElement('div');
+            card.className = 'history-card';
+
+            // Try to find a good title from the event data
+            const title = event.title || event.event_name || event.merchant || "Untitled Event";
+
+            card.innerHTML = `
+                <div class="date">${date}</div>
+                <div class="title">${title}</div>
+                <div class="meta">
+                    <div class="meta-item"><i class="fas fa-tag"></i> ${event.id.slice(0, 8)}</div>
+                    ${event.amount ? `<div class="meta-item"><i class="fas fa-dollar-sign"></i> ${event.amount}</div>` : ''}
+                </div>
+            `;
+
+            card.onclick = () => {
+                ui.switchView('ingest');
+                ui.renderResult(event);
+                const img = document.querySelector('#media-preview img');
+                if (img) img.src = ''; // Clear preview as we don't store images in DB yet
+            };
+
+            list.appendChild(card);
         });
     }
 };
@@ -332,6 +374,17 @@ const api = {
 
         } catch (e) {
             ui.log('ERR', `Request failed: ${e.message}`, 'err');
+        }
+    },
+
+    fetchEvents: async () => {
+        try {
+            ui.log('EXEC', '[DB] Fetching historical records...', 'sys');
+            const res = await fetch('/api/events');
+            const events = await res.json();
+            ui.renderHistory(events);
+        } catch (e) {
+            ui.log('ERR', `Failed to fetch history: ${e.message}`, 'err');
         }
     }
 };
