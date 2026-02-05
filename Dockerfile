@@ -11,7 +11,7 @@ WORKDIR /deps
 # Install system dependencies for PaddlePaddle
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,17 +31,24 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # =============================================================================
 # Stage 2: Production runtime
 # =============================================================================
-FROM oven/bun:latest
+FROM python:3.12-slim
+
+# Copy Bun from official image
+COPY --from=oven/bun:latest /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
 # Install Python and minimal runtime dependencies
+# Install minimal runtime dependencies (Python is already included)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
+    curl \
     libgomp1 \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
+
+# Create bun user/group
+RUN groupadd -r bun && useradd -r -g bun -d /home/bun -m bun
 
 # Copy Python virtual environment from builder stage
 COPY --from=python-deps /deps/venv /app/.venv
