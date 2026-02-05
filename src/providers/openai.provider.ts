@@ -117,6 +117,7 @@ export class OpenAIProvider extends BaseProvider {
 
                     const jsonMatch = accumulatedContent.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
                     const finalJson = JSON.parse(jsonMatch ? jsonMatch[0] : accumulatedContent);
+                    finalJson.generation_time_ms = latency;
 
                     saveEvent(finalJson);
 

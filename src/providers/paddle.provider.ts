@@ -26,6 +26,7 @@ export class PaddleProvider extends BaseProvider {
 
         return new ReadableStream({
             async start(controller) {
+                const startTime = Date.now();
                 try {
                     controller.enqueue(encoder.encode(JSON.stringify({ type: "log", tag: "EXEC", message: `[INIT] PaddleOCR Verification...` }) + "\n"));
 
@@ -60,7 +61,8 @@ export class PaddleProvider extends BaseProvider {
                     const finalEvent = {
                         title: "OCR Extraction",
                         extracted_text: extractedText,
-                        source: "PaddleOCR"
+                        source: "PaddleOCR",
+                        generation_time_ms: Date.now() - startTime
                     };
 
                     saveEvent(finalEvent);

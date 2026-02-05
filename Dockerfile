@@ -20,12 +20,13 @@ RUN python -m venv /deps/venv
 ENV PATH="/deps/venv/bin:$PATH"
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir \
-        paddlepaddle \
-        paddleocr \
-        fastapi \
-        uvicorn \
-        pydantic \
-        pillow
+    paddlepaddle \
+    paddleocr \
+    fastapi \
+    uvicorn \
+    pydantic        pillow \
+    transformers==4.57.6 \
+    sentencepiece
 
 # =============================================================================
 # Stage 2: Production runtime
