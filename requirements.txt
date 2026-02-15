@@ -9,4 +9,5 @@ sentencepiece
 torch
 accelerate
 bitsandbytes
+einops
 
