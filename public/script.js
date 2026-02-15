@@ -623,6 +623,15 @@ const api = {
             } catch { }
         }
 
+        // Fallback: If no compression (PDF or VRAM mode or failure), use original
+        if (!compressedBase64) {
+            const reader = new FileReader();
+            compressedBase64 = await new Promise(resolve => {
+                reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+                reader.readAsDataURL(file);
+            });
+        }
+
         loading.show('Processing...', 'Uploading to server');
 
         const fd = new FormData();

@@ -36,6 +36,16 @@ export class PaddleProvider extends BaseProvider {
                         await ModelService.start();
                     }
 
+                    // Auto-switch to Lite if using VLM on Eco
+                    const status = ModelService.getStatus();
+                    if (status.activeTier === "eco") {
+                        controller.enqueue(encoder.encode(JSON.stringify({ type: "log", tag: "EXEC", message: `[SYSTEM] VLM requires Lite tier. Switching...` }) + "\n"));
+                        ModelService.setActiveTier("lite");
+                        // Wait for bridge restart
+                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        await ModelService.start();
+                    }
+
                     controller.enqueue(encoder.encode(JSON.stringify({ type: "log", tag: "EXEC", message: `[HTTP] POST ${PaddleProvider.BRIDGE_URL}/ocr` }) + "\n"));
                     controller.enqueue(encoder.encode(JSON.stringify({ type: "log", tag: "EXEC", message: `[LOCAL] Running OCR engine (this may take 10-20s)...` }) + "\n"));
 
