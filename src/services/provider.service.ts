@@ -8,6 +8,8 @@ export class ProviderService {
         const isGemini = config.baseUrl.includes("generativelanguage.googleapis.com");
         const isPaddle = config.model === "PaddleOCR-VL-1.5";
 
+        console.log(`[DEBUG] getProvider: model=${config.model}, isPaddle=${isPaddle}, isGemini=${isGemini}`);
+
         if (isPaddle) return new PaddleProvider(config);
         if (isGemini) return new GeminiProvider(config);
 

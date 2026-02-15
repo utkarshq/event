@@ -145,6 +145,8 @@ export async function handleApiRequest(req: Request): Promise<Response> {
     if (url.pathname === "/api/parse-sync" && req.method === "POST") {
         try {
             const body = (await req.json()) as any;
+            console.log(`[DEBUG] /api/parse-sync payload: strategy=${body.strategy}, model=${body.model}, base64len=${body.base64_image ? body.base64_image.length : 0}`);
+
             const config: ProviderConfig = {
                 baseUrl: body.provider_url || "http://localhost:11434",
                 apiKey: body.api_key,
