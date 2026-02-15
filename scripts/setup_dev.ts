@@ -7,6 +7,16 @@ const CACHE_DIR = join(process.cwd(), ".paddle_cache");
 
 console.log("🛠  Checking development environment...");
 
+const FLAG_FILE = join(process.cwd(), "node_modules", ".python_deps_installed");
+
+// Check if we should skip
+if (process.argv.includes("--force")) {
+    console.log("Force flag detected. Re-checking env...");
+} else if (existsSync(FLAG_FILE) && existsSync(VENV_DIR)) {
+    console.log("✅ Python environment ready (cached). Skipping checks.");
+    process.exit(0);
+}
+
 // 1. Create .paddle_cache if missing
 if (!existsSync(CACHE_DIR)) {
     console.log(`📂 Creating paddle cache directory: ${CACHE_DIR}`);
@@ -29,7 +39,6 @@ const pipPath = join(VENV_DIR, "bin", "pip");
 // Upgrade pip first
 spawnSync(pipPath, ["install", "--upgrade", "pip"], { stdio: "inherit" });
 
-// 3. Install CPU-optimized PyTorch first (to prevent transformers from pulling GPU version)
 // 3. Install CPU-optimized PyTorch separateley (STRICTLY from CPU index)
 console.log("🧠 Installing PyTorch (CPU optimized)...");
 const torchProc = spawnSync(
@@ -72,5 +81,11 @@ if (installProc.status !== 0) {
     console.error("❌ Failed to install dependencies.");
     process.exit(1);
 }
+
+// Mark as installed
+const { writeFileSync } = require("fs");
+try {
+    writeFileSync(FLAG_FILE, new Date().toISOString());
+} catch { }
 
 console.log("✅ Development environment is ready!");
