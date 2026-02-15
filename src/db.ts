@@ -8,6 +8,14 @@
  */
 
 import { Database } from "bun:sqlite";
+import { mkdirSync } from "node:fs";
+
+// Ensure data directory exists
+try {
+  mkdirSync("data", { recursive: true });
+} catch (e) {
+  // Ignore error if directory already exists
+}
 
 // Initialize database with auto-creation
 const db = new Database("data/events.sqlite", { create: true });
