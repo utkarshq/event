@@ -23,14 +23,49 @@ if (!existsSync(VENV_DIR)) {
     }
 }
 
-// 3. Install dependencies
 console.log("📦 Checking/Installing Python dependencies...");
 const pipPath = join(VENV_DIR, "bin", "pip");
 
 // Upgrade pip first
 spawnSync(pipPath, ["install", "--upgrade", "pip"], { stdio: "inherit" });
 
-// Install requirements
+// 3. Install CPU-optimized PyTorch first (to prevent transformers from pulling GPU version)
+// 3. Install CPU-optimized PyTorch separateley (STRICTLY from CPU index)
+console.log("🧠 Installing PyTorch (CPU optimized)...");
+const torchProc = spawnSync(
+    pipPath,
+    [
+        "install",
+        "torch",
+        "--index-url",
+        "https://download.pytorch.org/whl/cpu",
+    ],
+    { stdio: "inherit" }
+);
+
+if (torchProc.status !== 0) {
+    console.error("❌ Failed to install PyTorch (CPU).");
+    process.exit(1);
+}
+
+// 4. Install VLM extras (from PyPI)
+console.log("🧩 Installing VLM extras...");
+const vlmProc = spawnSync(
+    pipPath,
+    [
+        "install",
+        "accelerate",
+        "bitsandbytes",
+    ],
+    { stdio: "inherit" }
+);
+if (vlmProc.status !== 0) {
+    console.warn("⚠️  VLM extras failed to install. 'eco' tier will work, but 'lite'/'pro' might fail.");
+}
+
+
+// 5. Install other requirements
+console.log("📦 Checking/Installing remaining dependencies...");
 const installProc = spawnSync(pipPath, ["install", "-r", "requirements.txt"], { stdio: "inherit" });
 
 if (installProc.status !== 0) {
