@@ -109,18 +109,29 @@ def load_model():
             import torch
             from transformers import AutoModel, AutoTokenizer
             
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+            device = "cpu"
+            if torch.cuda.is_available():
+                device = "cuda"
+            elif torch.backends.mps.is_available():
+                device = "mps"
+                
             print(f"📡 Loading VLM {MODEL_ID} ({args.tier}) [Device: {device}]...")
             
             load_args = {"trust_remote_code": True}
             if args.tier == "lite":
-                try:
-                    from transformers import BitsAndBytesConfig
-                    bnb_config = BitsAndBytesConfig(load_in_4bit=True)
-                    load_args["quantization_config"] = bnb_config
-                    print("✨ Using 4-bit quantization for Lite tier")
-                except ImportError:
-                    print("⚠️ bitsandbytes not found, falling back to standard precision")
+                if device == "mps":
+                    # MPS optimization: Use float16 instead of 4-bit quantization
+                    print("🍎 Optimizing for Apple Silicon (MPS)")
+                    load_args["torch_dtype"] = torch.float16
+                    print("✨ Using float16 precision for Lite tier on MPS")
+                else:
+                    try:
+                        from transformers import BitsAndBytesConfig
+                        bnb_config = BitsAndBytesConfig(load_in_4bit=True)
+                        load_args["quantization_config"] = bnb_config
+                        print("✨ Using 4-bit quantization for Lite tier")
+                    except ImportError:
+                        print("⚠️ bitsandbytes not found, falling back to standard precision")
             
             model = AutoModel.from_pretrained(MODEL_ID, **load_args).to(device)
             tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
