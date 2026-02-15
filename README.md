@@ -11,6 +11,8 @@ A vision-first document extraction engine that uses AI to intelligently extract 
   - **Strategy C**: Local OCR Only (fastest, no API required)
 - **Streaming Responses**: Real-time token streaming with live progress display
 - **Dynamic Schema**: Automatically adapts to extract any structured data
+- **Dynamically Optimized for Apple Silicon**: Automatically detects M1/M2/M3 chips to use Metal Performance Shaders (MPS) for up to 5x faster inference.
+- **Smart Tier Switching**: Automatically upgrades the OCR engine from "Eco" to "Lite" when VLM models are requested.
 - **Modern Web UI**: Clean, responsive interface with dark mode
 - **Headless Mode**: Full API access for backend integration
 - **SQLite Storage**: Persistent event history with automatic schema evolution
@@ -157,6 +159,11 @@ vision-event-engine/
 
 See [DEVELOPMENT.md](./DEVELOPMENT.md) for development setup and guidelines.
 
-## 📄 License
+## �️ Troubleshooting
+- **Upload Hangs**: If uploads don't trigger processing, check for JS errors. The system now has a fallback for VRAM mode to send raw files if compression fails.
+- **Paddle Bridge Defaults to Eco**: This is normal on startup. If you request a VLM model, the system will automatically restart the bridge in "Lite" mode.
+- **Dependency Issues**: If you see `ImportError: No module named 'einops'`, run `pip install -r requirements.txt` again.
+
+## �📄 License
 
 Proprietary - All rights reserved.
