@@ -6,3 +6,7 @@ pydantic
 pillow
 transformers==4.57.6
 sentencepiece
+torch
+accelerate
+bitsandbytes
+
