@@ -28,31 +28,43 @@ const server = Bun.serve({
 
     async fetch(req) {
         const url = new URL(req.url);
+        const start = performance.now();
 
-        // Route API requests to the API handler
-        if (url.pathname.startsWith("/api/")) {
-            return handleApiRequest(req);
-        }
+        // Log request on completion
+        const logRequest = (status: number) => {
+            const duration = (performance.now() - start).toFixed(2);
+            console.log(`[HTTP] ${req.method} ${url.pathname} ${status} (${duration}ms)`);
+        };
 
-        // Serve static files (optional, can be disabled for headless mode)
-        if (SERVE_STATIC) {
-            const urlPath = url.pathname;
-
-            // Serve index.html for root path
-            if (urlPath === "/" || urlPath === "/index.html") {
-                return new Response(Bun.file("public/index.html"), {
-                    headers: { "Content-Type": "text/html" }
-                });
+        const response = await (async () => {
+            // Route API requests to the API handler
+            if (url.pathname.startsWith("/api/")) {
+                return handleApiRequest(req);
             }
 
-            // Serve other static assets
-            if (urlPath.includes(".")) {
-                const file = Bun.file(`public${urlPath}`);
-                if (await file.exists()) return new Response(file);
-            }
-        }
+            // Serve static files (optional, can be disabled for headless mode)
+            if (SERVE_STATIC) {
+                const urlPath = url.pathname;
 
-        return new Response("Not Found", { status: 404 });
+                // Serve index.html for root path
+                if (urlPath === "/" || urlPath === "/index.html") {
+                    return new Response(Bun.file("public/index.html"), {
+                        headers: { "Content-Type": "text/html" }
+                    });
+                }
+
+                // Serve other static assets
+                if (urlPath.includes(".")) {
+                    const file = Bun.file(`public${urlPath}`);
+                    if (await file.exists()) return new Response(file);
+                }
+            }
+
+            return new Response("Not Found", { status: 404 });
+        })();
+
+        logRequest(response.status);
+        return response;
     },
 });
 

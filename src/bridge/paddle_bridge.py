@@ -170,6 +170,15 @@ async def health():
     }
 
 
+@app.get("/")
+async def root():
+    """Root endpoint to prevent 404s on direct access."""
+    return {
+        "message": "Vision Event Engine OCR Bridge. Please use the main application at port 3000.",
+        "docs_url": "/docs"
+    }
+
+
 @app.post("/ocr")
 async def perform_ocr(request: OCRRequest):
     """
